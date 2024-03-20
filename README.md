@@ -1,1 +1,1 @@
-# US-Net-Energy-Import-Dependance-Indicator
+# US-Net-Energy-Import-Dependency-Indicator
