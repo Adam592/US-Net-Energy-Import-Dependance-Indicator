@@ -10,3 +10,5 @@ doped = DoPED.DoPED(
     primary_energy_production, primary_energy_import, primary_energy_export
 )
 doped.filter_data()
+doped.generate_resource_dataframes()
+doped.format_all_datasets()
