@@ -191,4 +191,36 @@ class DoPED:
         self.calculate_pi_lnpi("crude_data")
         self.calculate_pi_lnpi("biomass_data")
 
-        print(self.biomass_data)
+    def calculate_d(self):
+        years = range(1973, 2023)
+        values = []
+
+        for year in years:
+            y = int(year)
+            val1 = self.coal_data.loc[self.coal_data["Year"] == y, "pi_lnpi"].sum()
+            val2 = self.crude_data.loc[self.crude_data["Year"] == y, "pi_lnpi"].sum()
+            val3 = self.natgas_data.loc[self.natgas_data["Year"] == y, "pi_lnpi"].sum()
+            val4 = self.biomass_data.loc[
+                self.biomass_data["Year"] == y, "pi_lnpi"
+            ].sum()
+            total_sum = val1 + val2 + val3 + val4
+            values.append(total_sum)
+
+        self.doped_df = self.doped_df.assign(D=values)
+
+    def calculate_esi_I(self):
+        years = range(1973, 2023)
+        values = []
+
+        index = 0
+        for year in years:
+            y = int(year)
+            val1 = self.doped_df.iloc[index]["D"]
+            val2 = np.log(4)
+            val3 = 100
+            total_sum = (val1 / val2) * val3
+            values.append(total_sum)
+            index += 1
+
+        self.doped_df = self.doped_df.assign(ESI_I=values)
+        print(self.doped_df)
