@@ -117,4 +117,78 @@ class DoPED:
         self.format_dataset("crude_data", "Crude Oil")
         self.format_dataset("biomass_data", "Biomass")
 
+    def get_yearly_sum(self):
+        years = range(1973, 2023)
+        aggregated_values = pd.DataFrame(columns=["Year", "Total Supply"])
+
+        for year in years:
+            y = int(year)
+            val1 = self.coal_data.loc[self.coal_data["Year"] == y, "Coal Supply"].sum()
+            val2 = self.crude_data.loc[
+                self.crude_data["Year"] == y, "Crude Oil Supply"
+            ].sum()
+            val3 = self.natgas_data.loc[
+                self.natgas_data["Year"] == y, "Natural Gas Supply"
+            ].sum()
+            val4 = self.biomass_data.loc[
+                self.biomass_data["Year"] == y, "Biomass Supply"
+            ].sum()
+            total_sum = val1 + val2 + val3 + val4
+            new_row = {"Year": y, "Total Supply": total_sum}
+            aggregated_values = aggregated_values.append(new_row, ignore_index=True)
+
+        self.doped_df = aggregated_values
+
+    def calculate_p_i(self, resource_data, resource_type):
+        dataset = getattr(self, resource_data)
+
+        index = 0
+        for year in dataset["Year"]:
+            total_sum = self.doped_df.iloc[index]["Total Supply"]
+            resource_supply = dataset.loc[
+                dataset["Year"] == year, f"{resource_type} Supply"
+            ]
+            insertable_value = resource_supply / total_sum
+            dataset.loc[dataset["Year"] == year, "p_i"] = insertable_value
+            index += 1
+
+        setattr(self, resource_data, dataset)
+
+    def calculate_ln_p_i(self, resource_data):
+        dataset = getattr(self, resource_data)
+
+        for year in dataset["Year"]:
+            p_i = dataset.loc[dataset["Year"] == year, "p_i"]
+            insertable_value = np.log(p_i)
+            dataset.loc[dataset["Year"] == year, "ln_p_i"] = insertable_value
+
+        setattr(self, resource_data, dataset)
+
+    def calculate_pi_lnpi(self, resource_data):
+        dataset = getattr(self, resource_data)
+
+        for year in dataset["Year"]:
+            p_i = dataset.loc[dataset["Year"] == year, "p_i"]
+            ln_p_i = dataset.loc[dataset["Year"] == year, "ln_p_i"]
+            insertable_value = p_i * ln_p_i
+            dataset.loc[dataset["Year"] == year, "pi_lnpi"] = insertable_value
+
+        setattr(self, resource_data, dataset)
+
+    def calculate_pi_variants_for_datasets(self):
+        self.calculate_p_i("coal_data", "Coal")
+        self.calculate_p_i("natgas_data", "Natural Gas")
+        self.calculate_p_i("crude_data", "Crude Oil")
+        self.calculate_p_i("biomass_data", "Biomass")
+
+        self.calculate_ln_p_i("coal_data")
+        self.calculate_ln_p_i("natgas_data")
+        self.calculate_ln_p_i("crude_data")
+        self.calculate_ln_p_i("biomass_data")
+
+        self.calculate_pi_lnpi("coal_data")
+        self.calculate_pi_lnpi("natgas_data")
+        self.calculate_pi_lnpi("crude_data")
+        self.calculate_pi_lnpi("biomass_data")
+
         print(self.biomass_data)

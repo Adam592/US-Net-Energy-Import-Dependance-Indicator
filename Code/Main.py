@@ -12,3 +12,5 @@ doped = DoPED.DoPED(
 doped.filter_data()
 doped.generate_resource_dataframes()
 doped.format_all_datasets()
+doped.get_yearly_sum()
+doped.calculate_pi_variants_for_datasets()
